@@ -23,6 +23,7 @@ func Start(frontFs embed.FS) {
 
 	// Set
 	config.DataDir = *dataDir
+	config.Host = fmt.Sprintf("%s:%d", *host, *port)
 
 	// Start server
 	ms.Start(ms.Config{

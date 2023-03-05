@@ -1,6 +1,12 @@
 package api
 
-import ml_net "github.com/maldan/go-ml/util/io/net"
+import (
+	"github.com/maldan/gam-app-ai_painter/internal/app/config"
+	ms_error "github.com/maldan/go-ml/server/error"
+	ml_convert "github.com/maldan/go-ml/util/convert"
+	ml_file "github.com/maldan/go-ml/util/io/fs/file"
+	ml_net "github.com/maldan/go-ml/util/io/net"
+)
 
 type SD struct {
 }
@@ -14,6 +20,10 @@ type ArgsTxt2Img struct {
 	Steps          int     `json:"steps"`
 }
 
+type SDTxt2ImgResponse struct {
+	Images []string `json:"images"`
+}
+
 func (r SD) PostTxt2Img(args ArgsTxt2Img) any {
 	response := ml_net.Post("http://localhost:7860/sdapi/v1/txt2img", &ml_net.RequestOptions{
 		Data: map[string]any{
@@ -25,7 +35,14 @@ func (r SD) PostTxt2Img(args ArgsTxt2Img) any {
 			"steps":          args.Steps,
 		},
 	})
-	v := map[string]any{}
+	v := SDTxt2ImgResponse{}
 	response.JSON(&v)
-	return v
+
+	image, err := ml_convert.FromBase64(v.Images[0])
+	ms_error.FatalIfError(err)
+
+	err = ml_file.New(config.DataDir + "/document/test/img.png").Write(image)
+	ms_error.FatalIfError(err)
+
+	return "http://" + config.Host + "/data/document/test/img.png"
 }

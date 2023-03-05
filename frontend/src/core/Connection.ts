@@ -9,6 +9,7 @@ export class Connection {
   public toId: string;
   public pinOutput: string;
   public pinInput: string;
+  public pair: string;
   public type: string;
 
   constructor(fromNode: Node, toNode: Node, pair: string) {
@@ -19,6 +20,7 @@ export class Connection {
     this.id = 'conn_' + uid(8);
     this.fromId = fromNode.id;
     this.toId = toNode.id;
+    this.pair = pair;
 
     const ff = fromNode.output().find((x) => x.split(':')[0] == this.pinOutput);
     if (ff) {

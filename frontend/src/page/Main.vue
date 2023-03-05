@@ -94,7 +94,11 @@ onMounted(() => {
       e.preventDefault();
     }
     if (e.key.toLowerCase() === 'a' && e.shiftKey) {
-      documentStore.createNode('Node_Int');
+      documentStore.createNode('Node_Preview');
+      e.preventDefault();
+    }
+    if (e.key.toLowerCase() === 'delete' && selectedNode.value) {
+      documentStore.deleteNode(selectedNode.value.id);
       e.preventDefault();
     }
   });

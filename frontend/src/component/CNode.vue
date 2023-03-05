@@ -14,11 +14,6 @@
       <!-- Input -->
       <div v-for="(x, i) in node.input()" :class="$style.input" :key="x">
         <div
-          :ref="(e) => (inputRef[x.split(':')[0]] = e)"
-          :class="$style.pin"
-          :style="{ backgroundColor: Node.typeToColor(x.split(':').pop()) }"
-        ></div>
-        <div
           :class="$style.pinLine"
           :style="{
             left: -20 - i * 5 + 'px',
@@ -26,12 +21,21 @@
             backgroundColor: Node.typeToColor(x.split(':').pop()),
           }"
         ></div>
+        <div
+          @mouseover="hoverPin(x)"
+          @mouseout="clearPin()"
+          :ref="(e) => (inputRef[x.split(':')[0]] = e)"
+          :class="$style.pin"
+          :style="{ backgroundColor: Node.typeToColor(x.split(':').pop()) }"
+        ></div>
+
         <div :class="$style.text">{{ x.split(':')[0] }}</div>
       </div>
 
       <!-- Output -->
       <div v-for="x in node.output()" :class="$style.output" :key="x">
         <div
+          @mousedown="grabPin(x)"
           :ref="(e) => (outputRef[x.split(':')[0]] = e)"
           :class="$style.pin"
           :style="{ backgroundColor: Node.typeToColor(x.split(':').pop()) }"
@@ -56,6 +60,7 @@ import { computed, onMounted, ref } from 'vue';
 import { Node } from '@/core/Node';
 import { useMainStore } from '@/store/main';
 import { useViewStore } from '@/store/view';
+import { useDocumentStore } from '@/store/document';
 
 // Props
 const props = defineProps({
@@ -65,6 +70,7 @@ const props = defineProps({
 
 // Stores
 const viewStore = useViewStore();
+const documentStore = useDocumentStore();
 
 // Vars
 const mainRef = ref<HTMLDivElement>();
@@ -94,6 +100,16 @@ onMounted(() => {
         props.node.x = startTranslate.x + delta.x;
         props.node.y = startTranslate.y + delta.y;
         refresh();
+      }
+    });
+
+    document.addEventListener('mouseup', (e: MouseEvent) => {
+      if (props.node.id === documentStore.dragToNodeId) {
+        documentStore.connectById(
+          documentStore.dragFromNodeId,
+          documentStore.dragToNodeId,
+          documentStore.dragFromPin + ':' + documentStore.dragToPin,
+        );
       }
     });
   }
@@ -131,6 +147,21 @@ function refresh() {
 
 async function execute() {
   await props.node.execute();
+}
+
+function grabPin(x: string) {
+  documentStore.dragFromPin = x;
+  documentStore.dragFromNodeId = props.node.id;
+}
+
+function hoverPin(x: string) {
+  documentStore.dragToPin = x;
+  documentStore.dragToNodeId = props.node.id;
+}
+
+function clearPin() {
+  documentStore.dragToPin = '';
+  documentStore.dragToNodeId = '';
 }
 </script>
 
@@ -175,6 +206,10 @@ async function execute() {
         height: 10px;
         border-radius: 8px;
         border: 1px solid #1b1b1b;
+
+        &:hover {
+          border: 1px solid #fefefe;
+        }
       }
 
       .pinLine {

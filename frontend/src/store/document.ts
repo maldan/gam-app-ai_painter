@@ -10,6 +10,10 @@ export interface IMainStore {
   name: string;
   nodeList: Node[];
   connectionList: Connection[];
+  dragFromNodeId: string;
+  dragToNodeId: string;
+  dragFromPin: string;
+  dragToPin: string;
 }
 
 export const useDocumentStore = defineStore({
@@ -19,6 +23,10 @@ export const useDocumentStore = defineStore({
       name: 'test',
       nodeList: [],
       connectionList: [],
+      dragFromNodeId: '',
+      dragToNodeId: '',
+      dragFromPin: '',
+      dragToPin: '',
     } as IMainStore),
   actions: {
     createNode(className: string, args: any = {}): Node {
@@ -41,7 +49,37 @@ export const useDocumentStore = defineStore({
       this.nodeList.push(node);
       return node;
     },
+    deleteNode(node: any) {
+      const nodeId = node;
+
+      this.nodeList = this.nodeList.filter((x) => x.id !== nodeId);
+      this.connectionList = this.connectionList.filter((x) => {
+        return !(x.fromNode.id === nodeId || x.toNode.id === nodeId);
+      });
+    },
+    connectById(fromNodeId: string, toNodeId: string, pair: string) {
+      if (fromNodeId === toNodeId) return;
+      const fromNode = this.nodeList.find((x) => x.id === fromNodeId);
+      const toNode = this.nodeList.find((x) => x.id === toNodeId);
+      if (!fromNode || !toNode) return;
+      this.connect(fromNode, toNode, pair);
+    },
+    unconnect(fromNode: Node, toNode: Node, pair: string) {
+      this.connectionList = this.connectionList.filter((x) => {
+        return !(x.fromNode.id === fromNode.id && x.toNode.id === toNode.id && x.pair === pair);
+      });
+    },
     connect(fromNode: Node, toNode: Node, pair: string) {
+      if (fromNode === toNode) return;
+
+      // Check if exists
+      if (
+        this.connectionList.find((x) => {
+          return x.fromNode.id === fromNode.id && x.toNode.id === toNode.id && x.pair === pair;
+        })
+      )
+        return;
+
       this.connectionList.push(new Connection(fromNode, toNode, pair));
     },
     async save() {

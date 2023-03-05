@@ -5,7 +5,7 @@ export class Node_Float extends Node {
     super();
 
     this.type = 'float';
-    this.props['x:float'] = 0;
+    this.props['value:float'] = 0;
   }
 
   output(): string[] {

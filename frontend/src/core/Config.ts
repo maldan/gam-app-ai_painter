@@ -6,6 +6,7 @@ import { Node_Txt2Img } from '@/core/node/Node_Txt2Img';
 import { Node_BlendImages } from '@/core/node/Node_BlendImages';
 import { Node_Image } from '@/core/node/Node_Image';
 import { Node_Vector2 } from '@/core/node/Node_Vector2';
+import { Node_Preview } from '@/core/node/Node_Preview';
 
 export class Config {
   public static nameToClass(className: string): any {
@@ -16,6 +17,7 @@ export class Config {
     if (className == 'Node_BlendImages') return Node_BlendImages;
     if (className == 'Node_Image') return Node_Image;
     if (className == 'Node_Vector2') return Node_Vector2;
+    if (className == 'Node_Preview') return Node_Preview;
     return Node;
   }
 }
