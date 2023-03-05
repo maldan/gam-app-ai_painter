@@ -13,8 +13,18 @@ export const useAPIStore = defineStore({
       x: 1,
     } as IAPIStore),
   actions: {
-    async txt2img(args: any) {
-      await Axios.post(`${API_URL}/sd/txt2img`, args);
+    async txt2img(args: any): Promise<string> {
+      return (await Axios.post(`${API_URL}/sd/txt2img`, args)).data;
+    },
+    async img2img(args: any): Promise<string> {
+      return (await Axios.post(`${API_URL}/sd/img2img`, args)).data;
+    },
+    async uploadImage(image: string): Promise<string> {
+      return (
+        await Axios.post(`${API_URL}/sd/uploadImage`, {
+          image,
+        })
+      ).data;
     },
   },
 });

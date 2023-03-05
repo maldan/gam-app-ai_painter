@@ -17,6 +17,8 @@ export class Node_Preview extends Node {
   }
 
   public async execute() {
+    await super.execute();
+    this.props['image:image'] = this.cache['image'];
     return this.props['image:image'];
   }
 }

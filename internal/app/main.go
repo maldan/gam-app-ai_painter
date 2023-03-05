@@ -35,6 +35,12 @@ func Start(frontFs embed.FS) {
 					ControllerList: []any{api.Main{}, api.SD{}, api.Document{}},
 				},
 			},
+			{
+				Path: "/data",
+				Handler: ms_handler.FS{
+					ContentPath: config.DataDir,
+				},
+			},
 		},
 	})
 	/*rapi.Start(rapi.Config{

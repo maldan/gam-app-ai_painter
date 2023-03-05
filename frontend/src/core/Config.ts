@@ -7,6 +7,7 @@ import { Node_BlendImages } from '@/core/node/Node_BlendImages';
 import { Node_Image } from '@/core/node/Node_Image';
 import { Node_Vector2 } from '@/core/node/Node_Vector2';
 import { Node_Preview } from '@/core/node/Node_Preview';
+import { Node_Img2Img } from '@/core/node/Node_Img2Img';
 
 export class Config {
   public static nameToClass(className: string): any {
@@ -14,6 +15,7 @@ export class Config {
     if (className == 'Node_Float') return Node_Float;
     if (className == 'Node_String') return Node_String;
     if (className == 'Node_Txt2Img') return Node_Txt2Img;
+    if (className == 'Node_Img2Img') return Node_Img2Img;
     if (className == 'Node_BlendImages') return Node_BlendImages;
     if (className == 'Node_Image') return Node_Image;
     if (className == 'Node_Vector2') return Node_Vector2;

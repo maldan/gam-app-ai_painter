@@ -14,6 +14,7 @@ export interface IMainStore {
   dragToNodeId: string;
   dragFromPin: string;
   dragToPin: string;
+  buffer: Node[];
 }
 
 export const useDocumentStore = defineStore({
@@ -27,6 +28,7 @@ export const useDocumentStore = defineStore({
       dragToNodeId: '',
       dragFromPin: '',
       dragToPin: '',
+      buffer: [],
     } as IMainStore),
   actions: {
     createNode(className: string, args: any = {}): Node {
@@ -80,6 +82,11 @@ export const useDocumentStore = defineStore({
       )
         return;
 
+      // Remove old connections to node
+      this.connectionList = this.connectionList.filter((x) => {
+        return !(x.toNode.id === toNode.id && x.pair === pair);
+      });
+
       this.connectionList.push(new Connection(fromNode, toNode, pair));
     },
     async save() {
@@ -92,12 +99,17 @@ export const useDocumentStore = defineStore({
     async load() {
       const doc = (await Axios.get(`${API_URL}/document?name=${this.name}`)).data;
       for (let i = 0; i < doc.nodeList.length; i++) {
+        // Skip duplicates
+        if (this.nodeList.find((x) => x.id === doc.nodeList[i].id)) continue;
         this.createNode(doc.nodeList[i].className, doc.nodeList[i]);
       }
       for (let i = 0; i < doc.connectionList.length; i++) {
         const fromNode = this.nodeList.find((x) => x.id === doc.connectionList[i].fromId);
         const toNode = this.nodeList.find((x) => x.id === doc.connectionList[i].toId);
         if (!fromNode || !toNode) continue;
+
+        // Skip duplicates
+        if (this.connectionList.find((x) => x.id === doc.connectionList[i].id)) continue;
 
         this.connect(fromNode, toNode, doc.connectionList[i].pinOutput + ':' + doc.connectionList[i].pinInput);
         // console.log(doc.connectionList[i]);

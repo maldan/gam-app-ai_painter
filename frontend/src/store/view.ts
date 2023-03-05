@@ -6,6 +6,7 @@ export interface IViewStore {
   x: number;
   y: number;
   zoom: number;
+  cursor: { x: number; y: number };
 }
 
 export const useViewStore = defineStore({
@@ -15,8 +16,12 @@ export const useViewStore = defineStore({
       x: 0,
       y: 0,
       zoom: 1,
+      cursor: { x: 0, y: 0 },
     } as IViewStore),
   actions: {
+    moveCursor(x: number, y: number) {
+      this.cursor = { x, y };
+    },
     move(x: number, y: number) {
       this.x = x;
       this.y = y;

@@ -5,8 +5,8 @@ export class Node_Image extends Node {
     super();
 
     this.type = 'image';
-    this.props['x:float'] = 0;
-    this.props['y:float'] = 0;
+    this.props['image:image'] = '';
+    // this.props['y:float'] = 0;
   }
 
   output(): string[] {
@@ -14,6 +14,6 @@ export class Node_Image extends Node {
   }
 
   public async execute() {
-    return 'sas';
+    return this.props['image:image'];
   }
 }

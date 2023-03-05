@@ -4,11 +4,11 @@
     :class="[$style.main, props.isSelected ? $style.selected : null]"
     :style="{ left: node.x + 'px', top: node.y + 'px' }"
   >
+    <input ref="imagePicker" type="file" style="display: none" />
+
     <div ref="headerRef" :class="$style.header" :style="{ backgroundColor: Node.typeToColor(node.type) }">
-      {{ node.constructor.name.replace('Node_', '') }}
-      <button :disabled="node.isProcessing" @click="execute" style="margin-left: auto" v-if="node.type === 'function'">
-        &gt;
-      </button>
+      {{ node.constructor.name.replace('Node_', '') }} {{ ~~node.x }} {{ ~~node.y }}
+      <button :disabled="node.isProcessing" @click="execute" style="margin-left: auto">&gt;</button>
     </div>
     <div :class="$style.body">
       <!-- Input -->
@@ -47,9 +47,16 @@
       <!-- Props -->
       <div v-for="(v, k) in node.props" :class="$style.prop" :key="k">
         <div :class="$style.keyName">{{ k.split(':')[0] }}</div>
-        <input v-if="k.split(':').pop() === 'float'" v-model="node.props[k]" />
-        <input v-if="k.split(':').pop() === 'int'" v-model="node.props[k]" />
+
+        <input v-if="k.split(':').pop() === 'float'" type="number" v-model="node.props[k]" />
+        <input @wheel.prevent="" v-if="k.split(':').pop() === 'int'" type="number" v-model="node.props[k]" />
         <textarea v-if="k.split(':').pop() === 'string'" v-model="node.props[k]" />
+
+        <!-- Image -->
+        <div v-if="k.split(':').pop() === 'image'">
+          <img :src="node.props[k]" />
+          <button @click="imagePicker.click()">Pick</button>
+        </div>
       </div>
     </div>
   </div>
@@ -61,6 +68,7 @@ import { Node } from '@/core/Node';
 import { useMainStore } from '@/store/main';
 import { useViewStore } from '@/store/view';
 import { useDocumentStore } from '@/store/document';
+import { useAPIStore } from '@/store/api';
 
 // Props
 const props = defineProps({
@@ -71,12 +79,14 @@ const props = defineProps({
 // Stores
 const viewStore = useViewStore();
 const documentStore = useDocumentStore();
+const apiStore = useAPIStore();
 
 // Vars
 const mainRef = ref<HTMLDivElement>();
 const headerRef = ref<HTMLDivElement | null>(null);
 const inputRef = ref<Record<string, HTMLDivElement>>({});
 const outputRef = ref<Record<string, HTMLDivElement>>({});
+const imagePicker = ref<HTMLInputElement>();
 
 // Hooks
 onMounted(() => {
@@ -105,16 +115,47 @@ onMounted(() => {
 
     document.addEventListener('mouseup', (e: MouseEvent) => {
       if (props.node.id === documentStore.dragToNodeId) {
+        const fromTuple = documentStore.dragFromPin.split(':');
+        const toTuple = documentStore.dragToPin.split(':');
+
+        // Not same types
+        if (fromTuple[1] != toTuple[1]) return;
+
+        // Connect
         documentStore.connectById(
           documentStore.dragFromNodeId,
           documentStore.dragToNodeId,
-          documentStore.dragFromPin + ':' + documentStore.dragToPin,
+          fromTuple[0] + ':' + toTuple[0],
         );
       }
     });
   }
 
   refresh();
+
+  if (imagePicker.value) {
+    imagePicker.value?.addEventListener('change', (e) => {
+      // @ts-ignore
+      const file = e.target.files[0];
+      const reader = new FileReader();
+
+      reader.addEventListener(
+        'load',
+        async () => {
+          // @ts-ignore
+          const response = await apiStore.uploadImage(reader.result);
+          console.log(response);
+          // @ts-ignore
+          props.node.props['image:image'] = response;
+        },
+        false,
+      );
+
+      if (file) {
+        reader.readAsDataURL(file);
+      }
+    });
+  }
 });
 
 // Methods
@@ -186,6 +227,33 @@ function clearPin() {
     border-radius: 8px 8px 0 0;
     text-transform: capitalize;
     display: flex;
+
+    button {
+      cursor: pointer;
+      background: rgba(0, 0, 0, 0.7);
+      color: #fefefe;
+      border: 0;
+      border-radius: 4px;
+
+      &:hover {
+        opacity: 0.9;
+      }
+
+      &:active {
+        position: relative;
+        top: 1px;
+        opacity: 0.75;
+      }
+
+      &:disabled {
+        background: rgba(0, 0, 0, 0.3);
+        cursor: not-allowed;
+
+        &:hover {
+          opacity: 1;
+        }
+      }
+    }
   }
 
   .body {
@@ -251,6 +319,11 @@ function clearPin() {
         border-radius: 4px;
         padding: 5px;
         outline: none;
+      }
+
+      img {
+        display: block;
+        max-width: 256px;
       }
     }
   }

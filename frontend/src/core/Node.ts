@@ -1,3 +1,5 @@
+import { uid } from 'uid';
+
 export class Node {
   public id = '';
   public type = '';
@@ -27,6 +29,15 @@ export class Node {
       this.cache[input[i].split(':')[0]] = await this.getInputValue(input[i].split(':')[0]);
     }
     this.isProcessing = false;
+  }
+
+  public clone(): Node {
+    const n = new Node();
+    n.id = uid(8);
+    n.type = this.type;
+    n.className = this.className;
+    n.props = { ...this.props };
+    return n;
   }
 
   public static typeToColor(type: string): string {

@@ -7,9 +7,9 @@
       backgroundSize: `${32 * viewStore.zoom}px ${32 * viewStore.zoom}px`,
     }"
   >
-    <div :class="$style.view" :style="{ transform: viewTransform() }">
+    <div ref="viewRef" :class="$style.view" :style="{ transform: viewTransform() }">
       <CNode
-        @mousedown.stop="selectNode(n)"
+        @mousedown="mouseDownNode($event, n)"
         v-for="n in documentStore.nodeList"
         :key="n.id"
         :is-selected="selectedNode?.id === n.id"
@@ -43,12 +43,12 @@ import { useDocumentStore } from '@/store/document';
 import { Node_Float } from '@/core/node/Node_Float';
 
 // Stores
-const mainStore = useMainStore();
 const documentStore = useDocumentStore();
 const viewStore = useViewStore();
 
 // Vars
 const selectedNode = ref<any>(null);
+const viewRef = ref<HTMLDivElement>();
 
 // Hooks
 onMounted(() => {
@@ -57,6 +57,7 @@ onMounted(() => {
   let startTranslate = { x: 0, y: 0 };
 
   document.addEventListener('mousedown', (e: MouseEvent) => {
+    // e.stopPropagation();
     if (e.button === 0) {
       selectNode(null);
     }
@@ -80,6 +81,9 @@ onMounted(() => {
 
       viewStore.move(startTranslate.x + delta.x, startTranslate.y + delta.y);
     }
+    const view = viewRef.value?.getBoundingClientRect();
+    if (!view) return;
+    viewStore.moveCursor((e.pageX - view.x) / viewStore.zoom, (e.pageY - view.y) / viewStore.zoom);
   });
   document.addEventListener('wheel', (e: WheelEvent) => {
     if (e.deltaY > 0) viewStore.zoom -= 0.1;
@@ -93,8 +97,23 @@ onMounted(() => {
       documentStore.save();
       e.preventDefault();
     }
+    if (e.key.toLowerCase() === 'c' && e.ctrlKey && selectedNode.value) {
+      e.preventDefault();
+      documentStore.buffer.push(selectedNode.value.clone());
+    }
+    if (e.key.toLowerCase() === 'v' && e.ctrlKey && documentStore.buffer.length) {
+      e.preventDefault();
+      for (let i = 0; i < documentStore.buffer.length; i++) {
+        const node = documentStore.createNode(documentStore.buffer[i].className, documentStore.buffer[i]);
+        node.x = viewStore.cursor.x;
+        node.y = viewStore.cursor.y;
+      }
+      documentStore.buffer.length = 0;
+    }
     if (e.key.toLowerCase() === 'a' && e.shiftKey) {
-      documentStore.createNode('Node_Preview');
+      const node = documentStore.createNode('Node_Image');
+      node.x = viewStore.cursor.x;
+      node.y = viewStore.cursor.y;
       e.preventDefault();
     }
     if (e.key.toLowerCase() === 'delete' && selectedNode.value) {
@@ -181,6 +200,13 @@ function calculateLine(fromNode: Node, toNode: Node, outputId: string, inputId: 
     borderLeft,
     borderBottom,
   };
+}
+
+function mouseDownNode(e: MouseEvent, node: Node) {
+  if (e.button === 0) {
+    e.stopPropagation();
+    selectNode(node);
+  }
 }
 </script>
 
