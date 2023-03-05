@@ -5,10 +5,9 @@ import (
 	"flag"
 	"fmt"
 	"github.com/maldan/gam-app-ai_painter/internal/app/api"
+	"github.com/maldan/gam-app-ai_painter/internal/app/config"
 	ms "github.com/maldan/go-ml/server"
 	"github.com/maldan/go-ml/server/core/handler"
-
-	"github.com/maldan/gam-app-ai_painter/internal/app/core"
 )
 
 func Start(frontFs embed.FS) {
@@ -23,7 +22,7 @@ func Start(frontFs embed.FS) {
 	flag.Parse()
 
 	// Set
-	core.DataDir = *dataDir
+	config.DataDir = *dataDir
 
 	// Start server
 	ms.Start(ms.Config{
@@ -32,7 +31,7 @@ func Start(frontFs embed.FS) {
 			{
 				Path: "/api",
 				Handler: ms_handler.API{
-					ControllerList: []any{api.MainApi{}},
+					ControllerList: []any{api.Main{}, api.SD{}, api.Document{}},
 				},
 			},
 		},

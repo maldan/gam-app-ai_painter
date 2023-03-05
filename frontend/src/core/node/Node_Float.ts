@@ -11,4 +11,8 @@ export class Node_Float extends Node {
   output(): string[] {
     return ['value:float'];
   }
+
+  async execute(): Promise<any> {
+    return Number(this.props['value:float']);
+  }
 }

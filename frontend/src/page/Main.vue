@@ -20,7 +20,7 @@
         :class="$style.line"
         v-for="x in documentStore.connectionList"
         :key="x.id"
-        :style="calculateLine(x.fromNode, x.toNode, x.outputId, x.inputId, x.type)"
+        :style="calculateLine(x.fromNode, x.toNode, x.pinOutput, x.pinInput, x.type)"
       ></div>
     </div>
   </div>
@@ -88,16 +88,27 @@ onMounted(() => {
     if (viewStore.zoom > 3) viewStore.zoom = 3;
   });
 
-  const n1 = documentStore.createNode(Node_Int);
-  const n2 = documentStore.createNode(Node_String);
-  const n3 = documentStore.createNode(Node_String);
-  const n4 = documentStore.createNode(Node_Float);
-  const n5 = documentStore.createNode(Node_Int);
-  const n6 = documentStore.createNode(Node_Vector2);
+  document.addEventListener('keydown', (e: KeyboardEvent) => {
+    if (e.key.toLowerCase() === 's' && e.ctrlKey) {
+      documentStore.save();
+      e.preventDefault();
+    }
+    if (e.key.toLowerCase() === 'a' && e.shiftKey) {
+      documentStore.createNode('Node_Int');
+      e.preventDefault();
+    }
+  });
 
-  const n10 = documentStore.createNode(Node_Txt2Img);
-  const n11 = documentStore.createNode(Node_Image);
-  const n20 = documentStore.createNode(Node_BlendImages);
+  /*const n1 = documentStore.createNode('Node_Int');
+  const n2 = documentStore.createNode('Node_String');
+  const n3 = documentStore.createNode('Node_String');
+  const n4 = documentStore.createNode('Node_Float');
+  const n5 = documentStore.createNode('Node_Int');
+  const n6 = documentStore.createNode('Node_Vector2');
+
+  const n10 = documentStore.createNode('Node_Txt2Img');
+  const n11 = documentStore.createNode('Node_Image');
+  const n20 = documentStore.createNode('Node_BlendImages');
 
   documentStore.connect(n1, n10, 'value:seed');
   documentStore.connect(n2, n10, 'value:prompt');
@@ -107,7 +118,10 @@ onMounted(() => {
   documentStore.connect(n6, n10, 'value:size');
 
   documentStore.connect(n10, n20, 'image:image1');
-  documentStore.connect(n11, n20, 'image:image2');
+  documentStore.connect(n11, n20, 'image:image2');*/
+
+  // documentStore.save();
+  documentStore.load();
 });
 
 // Methods
@@ -174,8 +188,6 @@ function calculateLine(fromNode: Node, toNode: Node, outputId: string, inputId: 
   height: 100%;
   background-color: #1b1b1b;
   background-image: url('@/asset/bg.svg');
-  // background-size: 16px 16px;
-  // background-position-x: 10px;
   position: relative;
 
   .view {

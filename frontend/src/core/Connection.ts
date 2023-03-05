@@ -1,21 +1,26 @@
 import type { Node } from '@/core/Node';
+import { uid } from 'uid';
 
 export class Connection {
   public id = '';
   public fromNode!: Node;
   public toNode!: Node;
-  public outputId: string;
-  public inputId: string;
+  public fromId: string;
+  public toId: string;
+  public pinOutput: string;
+  public pinInput: string;
   public type: string;
 
   constructor(fromNode: Node, toNode: Node, pair: string) {
     this.fromNode = fromNode;
     this.toNode = toNode;
-    this.outputId = pair.split(':')[0];
-    this.inputId = pair.split(':')[1];
-    this.id = fromNode.id + '_' + toNode.id + '_' + pair;
+    this.pinOutput = pair.split(':')[0];
+    this.pinInput = pair.split(':')[1];
+    this.id = 'conn_' + uid(8);
+    this.fromId = fromNode.id;
+    this.toId = toNode.id;
 
-    const ff = fromNode.output().find((x) => x.split(':')[0] == this.outputId);
+    const ff = fromNode.output().find((x) => x.split(':')[0] == this.pinOutput);
     if (ff) {
       this.type = ff.split(':')[1];
     } else {

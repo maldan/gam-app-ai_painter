@@ -15,4 +15,9 @@ export class Node_BlendImages extends Node {
   output(): string[] {
     return ['combined:image'];
   }
+
+  public async execute() {
+    await super.execute();
+    return 5;
+  }
 }

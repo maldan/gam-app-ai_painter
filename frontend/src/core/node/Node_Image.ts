@@ -12,4 +12,8 @@ export class Node_Image extends Node {
   output(): string[] {
     return ['image:image'];
   }
+
+  public async execute() {
+    return 'sas';
+  }
 }

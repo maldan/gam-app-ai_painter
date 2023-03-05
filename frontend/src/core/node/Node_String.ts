@@ -11,4 +11,8 @@ export class Node_String extends Node {
   output(): string[] {
     return ['value:string'];
   }
+
+  async execute(): Promise<any> {
+    return this.props['value:string'];
+  }
 }

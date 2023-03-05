@@ -1,8 +1,8 @@
 package api
 
-type MainApi struct {
+type Main struct {
 }
 
-func (r MainApi) GetIndex(args ArgsEmpty) string {
+func (r Main) GetIndex(args ArgsEmpty) string {
 	return "Test"
 }

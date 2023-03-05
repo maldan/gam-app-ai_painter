@@ -12,4 +12,8 @@ export class Node_Vector2 extends Node {
   output(): string[] {
     return ['value:vector2'];
   }
+
+  async execute(): Promise<any> {
+    return { x: Number(this.props['x:float']), y: Number(this.props['y:float']) };
+  }
 }

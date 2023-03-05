@@ -6,7 +6,9 @@
   >
     <div ref="headerRef" :class="$style.header" :style="{ backgroundColor: Node.typeToColor(node.type) }">
       {{ node.constructor.name.replace('Node_', '') }}
-      <button @click="execute" style="margin-left: auto" v-if="node.type === 'function'">E</button>
+      <button :disabled="node.isProcessing" @click="execute" style="margin-left: auto" v-if="node.type === 'function'">
+        &gt;
+      </button>
     </div>
     <div :class="$style.body">
       <!-- Input -->
@@ -69,7 +71,6 @@ const mainRef = ref<HTMLDivElement>();
 const headerRef = ref<HTMLDivElement | null>(null);
 const inputRef = ref<Record<string, HTMLDivElement>>({});
 const outputRef = ref<Record<string, HTMLDivElement>>({});
-const isProcessing = ref(false);
 
 // Hooks
 onMounted(() => {
@@ -129,9 +130,7 @@ function refresh() {
 }
 
 async function execute() {
-  isProcessing.value = true;
   await props.node.execute();
-  isProcessing.value = false;
 }
 </script>
 

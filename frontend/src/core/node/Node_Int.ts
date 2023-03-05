@@ -11,4 +11,8 @@ export class Node_Int extends Node {
   output(): string[] {
     return ['value:int'];
   }
+
+  async execute(): Promise<any> {
+    return Number(this.props['value:int']);
+  }
 }
