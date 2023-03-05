@@ -5,7 +5,7 @@ export class Node_Int extends Node {
     super();
 
     this.type = 'int';
-    this.props['x:int'] = 0;
+    this.props['value:int'] = 0;
   }
 
   output(): string[] {

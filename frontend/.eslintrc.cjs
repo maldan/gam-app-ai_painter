@@ -20,6 +20,7 @@ module.exports = {
     //'vue/no-mutating-props': 'off',
     //'@typescript-eslint/no-var-requires': 'off',
     "vue/multi-word-component-names": 'off',
+    "vue/no-mutating-props": 'off'
   },
   env: {
     "vue/setup-compiler-macros": true
