@@ -1,16 +1,14 @@
-package ai_painter
+package app
 
 import (
 	"embed"
 	"flag"
 	"fmt"
+	"github.com/maldan/gam-app-ai_painter/internal/app/api"
+	ms "github.com/maldan/go-ml/server"
+	"github.com/maldan/go-ml/server/core/handler"
 
-	"github.com/maldan/gam-app-ai_painter/internal/app/ai_painter/api"
-	"github.com/maldan/gam-app-ai_painter/internal/app/ai_painter/core"
-	"github.com/maldan/go-rapi"
-	"github.com/maldan/go-rapi/rapi_core"
-	"github.com/maldan/go-rapi/rapi_rest"
-	"github.com/maldan/go-rapi/rapi_vfs"
+	"github.com/maldan/gam-app-ai_painter/internal/app/core"
 )
 
 func Start(frontFs embed.FS) {
@@ -28,7 +26,18 @@ func Start(frontFs embed.FS) {
 	core.DataDir = *dataDir
 
 	// Start server
-	rapi.Start(rapi.Config{
+	ms.Start(ms.Config{
+		Host: fmt.Sprintf("%s:%d", *host, *port),
+		Router: []ms_handler.RouteHandler{
+			{
+				Path: "/api",
+				Handler: ms_handler.API{
+					ControllerList: []any{api.MainApi{}},
+				},
+			},
+		},
+	})
+	/*rapi.Start(rapi.Config{
 		Host: fmt.Sprintf("%s:%d", *host, *port),
 		Router: map[string]rapi_core.Handler{
 			"/": rapi_vfs.VFSHandler{
@@ -42,5 +51,5 @@ func Start(frontFs embed.FS) {
 			},
 		},
 		DbPath: core.DataDir,
-	})
+	})*/
 }

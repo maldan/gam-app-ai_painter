@@ -2,13 +2,12 @@ package main
 
 import (
 	"embed"
-
-	helloworld "github.com/maldan/gam-app-ai_painter/internal/app/ai_painter"
+	"github.com/maldan/gam-app-ai_painter/internal/app"
 )
 
 //go:embed frontend/dist/*
 var frontFs embed.FS
 
 func main() {
-	helloworld.Start(frontFs) //
+	app.Start(frontFs) //
 }

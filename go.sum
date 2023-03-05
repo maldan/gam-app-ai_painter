@@ -6,6 +6,8 @@ github.com/jmespath/go-jmespath/internal/testify v1.5.1/go.mod h1:L3OGu8Wl2/fWfC
 github.com/maldan/go-cmhp v0.0.20/go.mod h1:AJPrAVJnjTv8gglY++g5Lz8igdiySEKee64ru2Ohno8=
 github.com/maldan/go-cmhp v0.0.23 h1:yrRaC+sS9AEo9nzYGO07kT+mUxVZZj7kNXA2qy/yNHs=
 github.com/maldan/go-cmhp v0.0.23/go.mod h1:D8tgfxfQihpLXYC8R1GI8LvoBb0/Ee4cWNbWEkYAUW4=
+github.com/maldan/go-ml v0.0.0-20230216204214-f8a0edef6c32 h1:LevhHFR+uqqjtetr8TSDNKCwTbiPD3jSQE1Tu+5JPnY=
+github.com/maldan/go-ml v0.0.0-20230216204214-f8a0edef6c32/go.mod h1:rQFFuQzV1MYxMEksqn3mzR9tPj0GwlSB0+EhdA17B/k=
 github.com/maldan/go-rapi v0.0.6 h1:xLrQv03B6bdsmVOjwDU3RnODI1Enqbf4V+MH8rZn0z0=
 github.com/maldan/go-rapi v0.0.6/go.mod h1:jL732c7fMVoFpvMNz+X60p2gyn682icp8QD9XMc0yA8=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
