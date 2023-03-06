@@ -22,9 +22,9 @@ export class Connection {
     this.toId = toNode.id;
     this.pair = pair;
 
-    const ff = fromNode.output().find((x) => x.split(':')[0] == this.pinOutput);
+    const ff = fromNode.output.find((pin) => pin.name == this.pinOutput);
     if (ff) {
-      this.type = ff.split(':')[1];
+      this.type = ff.type;
     } else {
       this.type = 'unknown';
     }

@@ -22,12 +22,14 @@
         :key="x.id"
         :style="calculateLine(x.fromNode, x.toNode, x.pinOutput, x.pinInput, x.type)"
       ></div>
+
+      <NodePicker v-if="viewStore.nodePicker.isShow" :x="viewStore.nodePicker.x" :y="viewStore.nodePicker.y" />
     </div>
 
-    <div style="display: flex; flex-direction: column">
+    <!--    <div style="display: flex; flex-direction: column">
       <div>{{ ~~viewStore.x }} {{ ~~viewStore.y }}</div>
       <div>{{ viewStore.cursor }}</div>
-    </div>
+    </div>-->
   </div>
 </template>
 
@@ -46,6 +48,8 @@ import { useMainStore } from '@/store/main';
 import { useViewStore } from '@/store/view';
 import { useDocumentStore } from '@/store/document';
 import { Node_Float } from '@/core/node/Node_Float';
+import NodePicker from '@/component/NodePicker.vue';
+import { Config } from '@/core/Config';
 
 // Stores
 const documentStore = useDocumentStore();
@@ -61,8 +65,11 @@ onMounted(() => {
   let startDrag = { x: 0, y: 0 };
   let startTranslate = { x: 0, y: 0 };
 
+  document.addEventListener('click', (e: MouseEvent) => {
+    viewStore.toggleNodePicker(false);
+  });
+
   document.addEventListener('mousedown', (e: MouseEvent) => {
-    // e.stopPropagation();
     if (e.button === 0) {
       selectNode(null);
     }
@@ -112,8 +119,8 @@ onMounted(() => {
 
   document.addEventListener('keydown', (e: KeyboardEvent) => {
     if (e.key.toLowerCase() === 's' && e.ctrlKey) {
-      documentStore.save();
       e.preventDefault();
+      documentStore.save();
     }
     if (e.key.toLowerCase() === 'c' && e.ctrlKey && selectedNode.value) {
       e.preventDefault();
@@ -129,14 +136,12 @@ onMounted(() => {
       documentStore.buffer.length = 0;
     }
     if (e.key.toLowerCase() === 'a' && e.shiftKey) {
-      const node = documentStore.createNode('Node_Image');
-      node.x = viewStore.cursor.x;
-      node.y = viewStore.cursor.y;
       e.preventDefault();
+      viewStore.toggleNodePicker(true);
     }
     if (e.key.toLowerCase() === 'delete' && selectedNode.value) {
-      documentStore.deleteNode(selectedNode.value.id);
       e.preventDefault();
+      documentStore.deleteNode(selectedNode.value.id);
     }
   });
 
@@ -187,7 +192,7 @@ function calculateLine(fromNode: Node, toNode: Node, outputId: string, inputId: 
   let top = fy;
   let width = tx - fx;
   let height = ty - fy;
-  let typeColor = Node.typeToColor(type);
+  let typeColor = Config.typeToColor(type);
   let borderTop = `2px dashed ${typeColor}`;
   let borderRight = `2px dashed ${typeColor}`;
   let borderLeft = `2px dashed ${typeColor}`;

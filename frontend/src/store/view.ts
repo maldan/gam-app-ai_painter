@@ -7,6 +7,7 @@ export interface IViewStore {
   y: number;
   zoom: number;
   cursor: { x: number; y: number };
+  nodePicker: { x: number; y: number; isShow: boolean };
 }
 
 export const useViewStore = defineStore({
@@ -17,6 +18,7 @@ export const useViewStore = defineStore({
       y: 0,
       zoom: 1,
       cursor: { x: 0, y: 0 },
+      nodePicker: {},
     } as IViewStore),
   actions: {
     moveCursor(x: number, y: number) {
@@ -25,6 +27,13 @@ export const useViewStore = defineStore({
     move(x: number, y: number) {
       this.x = x;
       this.y = y;
+    },
+    toggleNodePicker(isShow: boolean) {
+      this.nodePicker = {
+        isShow,
+        x: this.cursor.x,
+        y: this.cursor.y,
+      };
     },
   },
 });

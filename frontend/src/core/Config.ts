@@ -22,4 +22,13 @@ export class Config {
     if (className == 'Node_Preview') return Node_Preview;
     return Node;
   }
+
+  public static typeToColor(type: string): string {
+    if (type == 'int') return '#992b96';
+    if (type == 'float' || type == 'vector2') return 'rgb(98,42,152)';
+    if (type == 'image') return '#98462a';
+    if (type == 'string') return '#50982a';
+    if (type == 'function') return '#1671c7';
+    return '#ffffff';
+  }
 }

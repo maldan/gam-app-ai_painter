@@ -5,6 +5,8 @@ import type { Node } from '@/core/Node';
 import { Connection } from '@/core/Connection';
 import { uid } from 'uid';
 import { Config } from '@/core/Config';
+import { nextTick } from 'vue';
+import { Pin } from '@/core/Pin';
 
 export interface IMainStore {
   name: string;
@@ -12,8 +14,8 @@ export interface IMainStore {
   connectionList: Connection[];
   dragFromNodeId: string;
   dragToNodeId: string;
-  dragFromPin: string;
-  dragToPin: string;
+  dragFromPin: Pin | null;
+  dragToPin: Pin | null;
   buffer: Node[];
 }
 
@@ -26,8 +28,8 @@ export const useDocumentStore = defineStore({
       connectionList: [],
       dragFromNodeId: '',
       dragToNodeId: '',
-      dragFromPin: '',
-      dragToPin: '',
+      dragFromPin: null,
+      dragToPin: null,
       buffer: [],
     } as IMainStore),
   actions: {
@@ -38,7 +40,7 @@ export const useDocumentStore = defineStore({
       node.x = args.x ?? Math.random() * 300;
       node.y = args.y ?? Math.random() * 300;
       node.className = className;
-      node.props = args.props ?? node.props;
+      // node.props = args.props ?? node.props;
 
       (node as Node).getInputValue = async (pinInput: string): Promise<any> => {
         const conn = this.connectionList.find((x) => {
@@ -71,6 +73,19 @@ export const useDocumentStore = defineStore({
         return !(x.fromNode.id === fromNode.id && x.toNode.id === toNode.id && x.pair === pair);
       });
     },
+    unconnectBy(fn: (fromNode: Node, toNode: Node, pinOutputId: string, pinInputId: string) => boolean) {
+      const newConnectList = [];
+      for (let i = 0; i < this.connectionList.length; i++) {
+        const cn = this.connectionList[i] as Connection;
+        if (fn(cn.fromNode, cn.toNode, cn.pinOutput, cn.pinInput)) {
+          cn.fromNode.emit('pinDisconnected', 'output', cn.pinOutput);
+          cn.fromNode.emit('pinDisconnected', 'input', cn.pinInput);
+        } else {
+          newConnectList.push(cn);
+        }
+      }
+      this.connectionList = newConnectList;
+    },
     connect(fromNode: Node, toNode: Node, pair: string) {
       if (fromNode === toNode) return;
 
@@ -88,6 +103,10 @@ export const useDocumentStore = defineStore({
       });
 
       this.connectionList.push(new Connection(fromNode, toNode, pair));
+
+      // Emit events
+      fromNode.emit('pinConnected', 'output', pair.split(':')[0]);
+      toNode.emit('pinConnected', 'input', pair.split(':')[1]);
     },
     async save() {
       await Axios.post(`${API_URL}/document`, {
@@ -103,18 +122,22 @@ export const useDocumentStore = defineStore({
         if (this.nodeList.find((x) => x.id === doc.nodeList[i].id)) continue;
         this.createNode(doc.nodeList[i].className, doc.nodeList[i]);
       }
-      for (let i = 0; i < doc.connectionList.length; i++) {
-        const fromNode = this.nodeList.find((x) => x.id === doc.connectionList[i].fromId);
-        const toNode = this.nodeList.find((x) => x.id === doc.connectionList[i].toId);
-        if (!fromNode || !toNode) continue;
 
-        // Skip duplicates
-        if (this.connectionList.find((x) => x.id === doc.connectionList[i].id)) continue;
+      // Connect in next tick
+      nextTick(() => {
+        for (let i = 0; i < doc.connectionList.length; i++) {
+          const fromNode = this.nodeList.find((x) => x.id === doc.connectionList[i].fromId);
+          const toNode = this.nodeList.find((x) => x.id === doc.connectionList[i].toId);
+          if (!fromNode || !toNode) continue;
 
-        this.connect(fromNode, toNode, doc.connectionList[i].pinOutput + ':' + doc.connectionList[i].pinInput);
-        // console.log(doc.connectionList[i]);
-        // this.createNode(doc.nodeList[i].className, doc.nodeList[i]);
-      }
+          // Skip duplicates
+          if (this.connectionList.find((x) => x.id === doc.connectionList[i].id)) continue;
+
+          this.connect(fromNode, toNode, doc.connectionList[i].pinOutput + ':' + doc.connectionList[i].pinInput);
+          // console.log(doc.connectionList[i]);
+          // this.createNode(doc.nodeList[i].className, doc.nodeList[i]);
+        }
+      });
     },
   },
 });

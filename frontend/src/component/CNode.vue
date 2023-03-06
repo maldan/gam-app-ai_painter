@@ -1,62 +1,59 @@
 <template>
   <div
     ref="mainRef"
-    :class="[$style.main, props.isSelected ? $style.selected : null]"
-    :style="{ left: node.x + 'px', top: node.y + 'px' }"
+    :class="[$style.main, props.isSelected ? $style.selected : null, node.isProcessing ? $style.processing : null]"
+    :style="{
+      left: node.x + 'px',
+      top: node.y + 'px',
+    }"
   >
     <input ref="imagePicker" type="file" style="display: none" />
 
-    <div ref="headerRef" :class="$style.header" :style="{ backgroundColor: Node.typeToColor(node.type) }">
-      {{ node.constructor.name.replace('Node_', '') }} {{ ~~node.x }} {{ ~~node.y }}
+    <div ref="headerRef" :class="$style.header" :style="{ backgroundColor: Config.typeToColor(node.type) }">
+      {{ node.constructor.name.replace('Node_', '') }}
+      <div :class="$style.name">{{ name }}</div>
       <button :disabled="node.isProcessing" @click="execute" style="margin-left: auto">&gt;</button>
     </div>
     <div :class="$style.body">
       <!-- Input -->
-      <div v-for="(x, i) in node.input()" :class="$style.input" :key="x">
+      <div v-for="(pin, i) in node.input" :class="$style.input" :key="pin.name">
+        <!-- Line -->
         <div
           :class="$style.pinLine"
           :style="{
             left: -20 - i * 5 + 'px',
             width: 10 + i * 5 + 'px',
-            backgroundColor: Node.typeToColor(x.split(':').pop()),
+            backgroundColor: Config.typeToColor(pin.type),
           }"
         ></div>
+
+        <!-- Pin -->
         <div
           @mouseover="hoverPin(x)"
           @mouseout="clearPin()"
-          :ref="(e) => (inputRef[x.split(':')[0]] = e)"
+          @contextmenu.prevent="clearPinConnection('input', pin.name)"
+          :ref="(e) => (inputRef[pin.name] = e)"
           :class="$style.pin"
-          :style="{ backgroundColor: Node.typeToColor(x.split(':').pop()) }"
+          :style="{ backgroundColor: Config.typeToColor(pin.type) }"
         ></div>
 
-        <div :class="$style.text">{{ x.split(':')[0] }}</div>
+        <!-- Name -->
+        <div :class="$style.text">{{ pin.name }}</div>
+
+        <input type="text" />
       </div>
 
       <!-- Output -->
-      <div v-for="x in node.output()" :class="$style.output" :key="x">
+      <div v-for="pin in node.output" :class="$style.output" :key="pin.name">
         <div
-          @mousedown="grabPin(x)"
-          :ref="(e) => (outputRef[x.split(':')[0]] = e)"
-          :class="$style.pin"
-          :style="{ backgroundColor: Node.typeToColor(x.split(':').pop()) }"
+          @mousedown="grabPin(pin)"
+          @contextmenu.prevent="clearPinConnection('output', pin.name)"
+          :ref="(e) => (outputRef[pin.name] = e)"
+          :class="[$style.pin]"
+          :style="{ backgroundColor: Config.typeToColor(pin.type) }"
         ></div>
 
-        <div :class="$style.text">{{ x.split(':')[0] }}</div>
-      </div>
-
-      <!-- Props -->
-      <div v-for="(v, k) in node.props" :class="$style.prop" :key="k">
-        <div :class="$style.keyName">{{ k.split(':')[0] }}</div>
-
-        <input v-if="k.split(':').pop() === 'float'" type="number" v-model="node.props[k]" />
-        <input @wheel.prevent="" v-if="k.split(':').pop() === 'int'" type="number" v-model="node.props[k]" />
-        <textarea v-if="k.split(':').pop() === 'string'" v-model="node.props[k]" />
-
-        <!-- Image -->
-        <div v-if="k.split(':').pop() === 'image'">
-          <img :src="node.props[k]" />
-          <button @click="imagePicker.click()">Pick</button>
-        </div>
+        <div :class="$style.text">{{ pin.name }}</div>
       </div>
     </div>
   </div>
@@ -65,10 +62,12 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { Node } from '@/core/Node';
+import { Config } from '@/core/Config';
 import { useMainStore } from '@/store/main';
 import { useViewStore } from '@/store/view';
 import { useDocumentStore } from '@/store/document';
 import { useAPIStore } from '@/store/api';
+import type { Pin } from '@/core/Pin';
 
 // Props
 const props = defineProps({
@@ -87,6 +86,7 @@ const headerRef = ref<HTMLDivElement | null>(null);
 const inputRef = ref<Record<string, HTMLDivElement>>({});
 const outputRef = ref<Record<string, HTMLDivElement>>({});
 const imagePicker = ref<HTMLInputElement>();
+const name = ref('');
 
 // Hooks
 onMounted(() => {
@@ -112,20 +112,22 @@ onMounted(() => {
         refresh();
       }
     });
-
     document.addEventListener('mouseup', (e: MouseEvent) => {
+      if (documentStore.dragFromPin == null) return;
+      if (documentStore.dragToPin == null) return;
+
       if (props.node.id === documentStore.dragToNodeId) {
-        const fromTuple = documentStore.dragFromPin.split(':');
-        const toTuple = documentStore.dragToPin.split(':');
+        //const fromTuple = documentStore.dragFromPin.split(':');
+        //const toTuple = documentStore.dragToPin.split(':');
 
         // Not same types
-        if (fromTuple[1] != toTuple[1]) return;
+        if (documentStore.dragFromPin.type != documentStore.dragToPin.type) return;
 
         // Connect
         documentStore.connectById(
           documentStore.dragFromNodeId,
           documentStore.dragToNodeId,
-          fromTuple[0] + ':' + toTuple[0],
+          documentStore.dragFromPin.name + ':' + documentStore.dragToPin.name,
         );
       }
     });
@@ -156,6 +158,19 @@ onMounted(() => {
       }
     });
   }
+
+  // Set name
+  const nodeOutputList = documentStore.connectionList.filter((x) => x.fromNode.id == props.node.id);
+  if (nodeOutputList.length > 0) {
+    name.value = nodeOutputList[0].pinInput;
+  }
+
+  /*props.node.on('pinConnected', (type: string, pinId: string) => {
+    //console.log('connect', type, pinId);
+  });
+  props.node.on('pinDisconnected', (type: string, pinId: string) => {
+    //console.log('disconnect', type, pinId);
+  });*/
 });
 
 // Methods
@@ -190,19 +205,34 @@ async function execute() {
   await props.node.execute();
 }
 
-function grabPin(x: string) {
-  documentStore.dragFromPin = x;
+function grabPin(pin: Pin) {
+  documentStore.dragFromPin = pin;
   documentStore.dragFromNodeId = props.node.id;
 }
 
-function hoverPin(x: string) {
-  documentStore.dragToPin = x;
+function hoverPin(pin: Pin) {
+  documentStore.dragToPin = pin;
   documentStore.dragToNodeId = props.node.id;
 }
 
 function clearPin() {
-  documentStore.dragToPin = '';
+  documentStore.dragToPin = null;
   documentStore.dragToNodeId = '';
+}
+
+function clearPinConnection(type: string, pinId: string) {
+  // const pinId = pin.split(':')[0];
+
+  if (type === 'input') {
+    documentStore.unconnectBy((fromNode: Node, toNode: Node, pinOutputId: string, pinInputId: string) => {
+      return toNode.id === props.node.id && pinInputId === pinId;
+    });
+  }
+  if (type === 'output') {
+    documentStore.unconnectBy((fromNode: Node, toNode: Node, pinOutputId: string, pinInputId: string) => {
+      return fromNode.id === props.node.id && pinOutputId === pinId;
+    });
+  }
 }
 </script>
 
@@ -221,12 +251,24 @@ function clearPin() {
     border: 2px dashed rgba(255, 255, 255, 0.3);
   }
 
+  &.processing {
+    opacity: 0.5;
+    // border: 2px solid rgba(69, 135, 34, 0.7);
+  }
+
   .header {
     background-color: rgba(223, 5, 52, 0.4);
     padding: 5px 10px;
     border-radius: 8px 8px 0 0;
     text-transform: capitalize;
     display: flex;
+    align-items: center;
+
+    .name {
+      margin-right: 10px;
+      margin-left: 10px;
+      font-size: 12px;
+    }
 
     button {
       cursor: pointer;
@@ -264,6 +306,16 @@ function clearPin() {
     .output {
       position: relative;
       padding: 5px;
+
+      input {
+        margin-top: 5px;
+        border: 0;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 4px;
+        outline: none;
+        color: rgba(255, 255, 255, 0.5);
+        padding: 5px;
+      }
 
       .pin {
         left: -16px;
