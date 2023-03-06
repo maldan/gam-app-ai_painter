@@ -23,6 +23,11 @@
         :style="calculateLine(x.fromNode, x.toNode, x.pinOutput, x.pinInput, x.type)"
       ></div>
     </div>
+
+    <div style="display: flex; flex-direction: column">
+      <div>{{ ~~viewStore.x }} {{ ~~viewStore.y }}</div>
+      <div>{{ viewStore.cursor }}</div>
+    </div>
   </div>
 </template>
 
@@ -86,10 +91,23 @@ onMounted(() => {
     viewStore.moveCursor((e.pageX - view.x) / viewStore.zoom, (e.pageY - view.y) / viewStore.zoom);
   });
   document.addEventListener('wheel', (e: WheelEvent) => {
+    const oldZoom = viewStore.zoom;
+
     if (e.deltaY > 0) viewStore.zoom -= 0.1;
     if (e.deltaY < 0) viewStore.zoom += 0.1;
     if (viewStore.zoom < 0.3) viewStore.zoom = 0.3;
     if (viewStore.zoom > 3) viewStore.zoom = 3;
+
+    const offsetX = viewStore.cursor.x * viewStore.zoom - viewStore.cursor.x * oldZoom;
+    const offsetY = viewStore.cursor.y * viewStore.zoom - viewStore.cursor.y * oldZoom;
+
+    if (e.deltaY < 0) {
+      viewStore.x -= offsetX;
+      viewStore.y -= offsetY;
+    } else {
+      viewStore.x -= offsetX;
+      viewStore.y -= offsetY;
+    }
   });
 
   document.addEventListener('keydown', (e: KeyboardEvent) => {
@@ -226,14 +244,8 @@ function mouseDownNode(e: MouseEvent, node: Node) {
     top: 0;
     width: 100%;
     height: 100%;
-
-    svg {
-      width: 100%;
-      height: 100%;
-      position: absolute;
-      left: 0;
-      top: 0;
-    }
+    transform-origin: top left;
+    border: 1px solid #fe0000;
 
     .line {
       position: absolute;
