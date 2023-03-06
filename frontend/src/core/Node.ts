@@ -37,9 +37,15 @@ export class Node {
   public initPins() {
     this.input.forEach((x) => {
       this.inputValue[x.name] = '';
+      if (x.type == 'int') this.inputValue[x.name] = 0;
+      if (x.type == 'float') this.inputValue[x.name] = 0;
+      if (x.type == 'vector2') this.inputValue[x.name] = { x: 0, y: 0 };
     });
     this.output.forEach((x) => {
       this.outputValue[x.name] = '';
+      if (x.type == 'int') this.outputValue[x.name] = 0;
+      if (x.type == 'float') this.outputValue[x.name] = 0;
+      if (x.type == 'vector2') this.outputValue[x.name] = { x: 0, y: 0 };
     });
   }
 
@@ -55,7 +61,10 @@ export class Node {
     this.isProcessing = true;
     // const input = this.input();
     for (let i = 0; i < this.input.length; i++) {
-      this.inputValue[this.input[i].name] = await this.getInputValue(this.input[i].name);
+      if (this.isInputPinConnected[this.input[i].name]) {
+        this.inputValue[this.input[i].name] = await this.getInputValue(this.input[i].name);
+      }
+
       // this.cache[input[i].name] = await this.getInputValue(input[i].name);
     }
     this.isProcessing = false;

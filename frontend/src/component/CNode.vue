@@ -29,7 +29,7 @@
 
         <!-- Pin -->
         <div
-          @mouseover="hoverPin(x)"
+          @mouseover="hoverPin(pin)"
           @mouseout="clearPin()"
           @contextmenu.prevent="clearPinConnection('input', pin.name)"
           :ref="(e) => (inputRef[pin.name] = e)"
@@ -40,7 +40,9 @@
         <!-- Name -->
         <div :class="$style.text">{{ pin.name }}</div>
 
-        <input type="text" />
+        <NodeField v-if="!node.isInputPinConnected[pin.name]" :type="pin.type" v-model="node.inputValue[pin.name]" />
+        <!--        <input v-if="pin.type === 'int'" type="number" />
+        <input v-if="pin.type === 'float'" type="number" />-->
       </div>
 
       <!-- Output -->
@@ -54,6 +56,8 @@
         ></div>
 
         <div :class="$style.text">{{ pin.name }}</div>
+
+        <NodeField :type="pin.type" v-model="node.outputValue[pin.name]" />
       </div>
     </div>
   </div>
@@ -68,6 +72,7 @@ import { useViewStore } from '@/store/view';
 import { useDocumentStore } from '@/store/document';
 import { useAPIStore } from '@/store/api';
 import type { Pin } from '@/core/Pin';
+import NodeField from '@/component/NodeField.vue';
 
 // Props
 const props = defineProps({
