@@ -1,12 +1,13 @@
 package db
 
 type Node struct {
-	Id        string         `json:"id"`
-	Type      string         `json:"type"`
-	ClassName string         `json:"className"`
-	X         float64        `json:"x"`
-	Y         float64        `json:"y"`
-	Props     map[string]any `json:"props"`
+	Id          string         `json:"id"`
+	Type        string         `json:"type"`
+	ClassName   string         `json:"className"`
+	X           float64        `json:"x"`
+	Y           float64        `json:"y"`
+	InputValue  map[string]any `json:"inputValue"`
+	OutputValue map[string]any `json:"outputValue"`
 }
 
 type Connection struct {

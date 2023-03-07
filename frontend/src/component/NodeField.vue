@@ -1,13 +1,16 @@
 <template>
   <div :class="$style.main">
-    <input v-if="type === 'int'" type="number" style="width: 64px" @change="changeNumber" />
-    <input v-if="type === 'float'" type="number" style="width: 64px" @change="changeNumber" />
+    <input v-if="type === 'int'" type="number" :value="modelValue" @change="changeNumber" />
+    <input v-if="type === 'float'" type="number" step="0.1" :value="modelValue" @change="changeNumber" />
+
+    <textarea v-if="type === 'string'" @change="changeString" :value="modelValue"></textarea>
+
     <div v-if="type === 'image'">
       <img :src="modelValue" style="max-width: 256px" alt="Image" />
     </div>
-    <div v-if="type === 'vector2'" style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px">
-      <input type="number" style="width: 64px" @change="changeVector2($event, 'x')" />
-      <input type="number" style="width: 64px" @change="changeVector2($event, 'y')" />
+    <div v-if="type === 'vector2'" style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; width: 128px">
+      <input type="number" :value="modelValue.x" @change="changeVector2($event, 'x')" />
+      <input type="number" :value="modelValue.y" @change="changeVector2($event, 'y')" />
     </div>
   </div>
 </template>
@@ -49,9 +52,23 @@ function changeVector2(e: any, field: string) {
   // @ts-ignore
   if (field === 'y') emit('update:modelValue', { x: props.modelValue.x, y: Number(e.target.value) });
 }
+function changeString(e: any) {
+  emit('update:modelValue', e.target.value);
+}
 </script>
 
 <style module lang="scss">
 .main {
+  input,
+  textarea {
+    margin-top: 5px;
+    border: 0;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 4px;
+    outline: none;
+    color: rgba(255, 255, 255, 0.5);
+    padding: 5px;
+    width: calc(100% - 10px);
+  }
 }
 </style>

@@ -14,7 +14,7 @@ export class Node_Float extends Node {
     return ['value:float'];
   }*/
 
-  /*async execute(): Promise<any> {
-    return Number(this.props['value:float']);
-  }*/
+  async execute(): Promise<any> {
+    return Number(this.outputValue['value']);
+  }
 }

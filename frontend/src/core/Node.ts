@@ -7,11 +7,9 @@ export class Node {
   public className = '';
   public x = 0;
   public y = 0;
-  // public props = {} as Record<string, any>;
   public outputPinPosition = {} as Record<string, { x: number; y: number }>;
   public inputPinPosition = {} as Record<string, { x: number; y: number }>;
   public isProcessing = false;
-  // public cache = {} as Record<string, any>;
   public isInputPinConnected = {} as Record<string, boolean>;
   public isOutputPinConnected = {} as Record<string, boolean>;
   public input: Pin[] = [];
@@ -49,14 +47,6 @@ export class Node {
     });
   }
 
-  /*public input(): Pin[] {
-    return [];
-  }
-
-  public output(): Pin[] {
-    return [];
-  }*/
-
   public async execute(): Promise<any> {
     this.isProcessing = true;
     // const input = this.input();
@@ -64,8 +54,6 @@ export class Node {
       if (this.isInputPinConnected[this.input[i].name]) {
         this.inputValue[this.input[i].name] = await this.getInputValue(this.input[i].name);
       }
-
-      // this.cache[input[i].name] = await this.getInputValue(input[i].name);
     }
     this.isProcessing = false;
   }

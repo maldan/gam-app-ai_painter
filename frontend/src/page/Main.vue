@@ -36,18 +36,9 @@
 <script setup lang="ts">
 import CNode from '@/component/CNode.vue';
 import { onMounted, ref } from 'vue';
-import { Node } from '@/core/Node';
-import { Node_Vector2 } from '@/core/node/Node_Vector2';
-import { Node_Int } from '@/core/node/Node_Int';
-import { Node_Image } from '@/core/node/Node_Image';
-import { Node_String } from '@/core/node/Node_String';
-import { Node_Txt2Img } from '@/core/node/Node_Txt2Img';
-import { Node_BlendImages } from '@/core/node/Node_BlendImages';
-import { vi } from 'vitest';
-import { useMainStore } from '@/store/main';
+import type { Node } from '@/core/Node';
 import { useViewStore } from '@/store/view';
 import { useDocumentStore } from '@/store/document';
-import { Node_Float } from '@/core/node/Node_Float';
 import NodePicker from '@/component/NodePicker.vue';
 import { Config } from '@/core/Config';
 

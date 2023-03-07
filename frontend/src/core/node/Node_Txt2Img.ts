@@ -19,17 +19,20 @@ export class Node_Txt2Img extends Node {
     await super.execute();
 
     this.isProcessing = true;
+    let image = '';
     const apiStore = useAPIStore();
-    const image = await apiStore.txt2img({
-      seed: this.inputValue['seed'],
-      prompt: this.inputValue['prompt'],
-      negativePrompt: this.inputValue['negativePrompt'],
-      cfg: this.inputValue['cfg'],
-      steps: this.inputValue['steps'],
-      width: this.inputValue['size'].x,
-      height: this.inputValue['size'].y,
-    });
-    this.outputValue['image'] = image;
+    try {
+      image = await apiStore.txt2img({
+        seed: this.inputValue['seed'],
+        prompt: this.inputValue['prompt'],
+        negativePrompt: this.inputValue['negativePrompt'],
+        cfg: this.inputValue['cfg'],
+        steps: this.inputValue['steps'],
+        width: this.inputValue['size'].x,
+        height: this.inputValue['size'].y,
+      });
+      this.outputValue['image'] = image;
+    } catch {}
     this.isProcessing = false;
 
     return image;

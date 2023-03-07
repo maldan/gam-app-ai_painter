@@ -6,7 +6,7 @@ import { Connection } from '@/core/Connection';
 import { uid } from 'uid';
 import { Config } from '@/core/Config';
 import { nextTick } from 'vue';
-import { Pin } from '@/core/Pin';
+import type { Pin } from '@/core/Pin';
 
 export interface IMainStore {
   name: string;
@@ -40,7 +40,8 @@ export const useDocumentStore = defineStore({
       node.x = args.x ?? Math.random() * 300;
       node.y = args.y ?? Math.random() * 300;
       node.className = className;
-      // node.props = args.props ?? node.props;
+      node.inputValue = { ...node.inputValue, ...args.inputValue };
+      node.outputValue = { ...node.outputValue, ...args.outputValue };
 
       (node as Node).getInputValue = async (pinInput: string): Promise<any> => {
         const conn = this.connectionList.find((x) => {

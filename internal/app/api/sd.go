@@ -13,6 +13,7 @@ type SD struct {
 }
 
 type ArgsTxt2Img struct {
+	Seed           int     `json:"seed"`
 	Prompt         string  `json:"prompt"`
 	NegativePrompt string  `json:"negativePrompt"`
 	Width          int     `json:"width"`
@@ -22,6 +23,7 @@ type ArgsTxt2Img struct {
 }
 
 type ArgsImg2Img struct {
+	Seed              int     `json:"seed"`
 	InitImage         string  `json:"initImage"`
 	Prompt            string  `json:"prompt"`
 	NegativePrompt    string  `json:"negativePrompt"`
@@ -43,6 +45,7 @@ type SDTxt2ImgResponse struct {
 func (r SD) PostTxt2Img(args ArgsTxt2Img) any {
 	response := ml_net.Post("http://localhost:7860/sdapi/v1/txt2img", &ml_net.RequestOptions{
 		Data: map[string]any{
+			"seed":           args.Seed,
 			"prompt":         args.Prompt,
 			"negativePrompt": args.NegativePrompt,
 			"width":          args.Width,
@@ -84,6 +87,7 @@ func (r SD) PostImg2Img(args ArgsImg2Img) any {
 			"init_images": []string{
 				b64,
 			},
+			"seed":               args.Seed,
 			"prompt":             args.Prompt,
 			"negativePrompt":     args.NegativePrompt,
 			"width":              args.Width,

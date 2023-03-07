@@ -22,40 +22,27 @@ export class Node_Img2Img extends Node {
     this.initPins();
   }
 
-  /*input(): string[] {
-    return [
-      'initImage:image',
-      'seed:int',
-      'prompt:string',
-      'negativePrompt:string',
-      'cfg:float',
-      'steps:int',
-      'size:vector2',
-      'denoisingStrength:float',
-    ];
-  }
-
-  output(): string[] {
-    return ['image:image'];
-  }*/
-
   public async execute() {
     await super.execute();
 
-    /* this.isProcessing = true;
+    this.isProcessing = true;
+    let image = '';
     const apiStore = useAPIStore();
-    const image = await apiStore.img2img({
-      initImage: this.cache['initImage'],
-      prompt: this.cache['prompt'],
-      negativePrompt: this.cache['negativePrompt'],
-      cfg: this.cache['cfg'],
-      steps: this.cache['steps'],
-      width: this.cache['size'].x,
-      height: this.cache['size'].y,
-      denoisingStrength: this.cache['denoisingStrength'],
-    });
+    try {
+      image = await apiStore.img2img({
+        initImage: this.inputValue['initImage'],
+        prompt: this.inputValue['prompt'],
+        negativePrompt: this.inputValue['negativePrompt'],
+        cfg: this.inputValue['cfg'],
+        steps: this.inputValue['steps'],
+        width: this.inputValue['size'].x,
+        height: this.inputValue['size'].y,
+        denoisingStrength: this.inputValue['denoisingStrength'],
+      });
+      this.outputValue['image'] = image;
+    } catch {}
     this.isProcessing = false;
 
-    return image;*/
+    return image;
   }
 }

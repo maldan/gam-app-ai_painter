@@ -310,17 +310,7 @@ function clearPinConnection(type: string, pinId: string) {
     .input,
     .output {
       position: relative;
-      padding: 5px;
-
-      input {
-        margin-top: 5px;
-        border: 0;
-        background: rgba(0, 0, 0, 0.5);
-        border-radius: 4px;
-        outline: none;
-        color: rgba(255, 255, 255, 0.5);
-        padding: 5px;
-      }
+      padding: 2px 5px;
 
       .pin {
         left: -16px;
